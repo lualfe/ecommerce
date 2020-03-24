@@ -4,7 +4,7 @@ import "github.com/lualfe/ecommerce/app"
 
 // Web model
 type Web struct {
-	PG app.Repository
+	DB app.Repository
 	MG app.Migration
 }
 

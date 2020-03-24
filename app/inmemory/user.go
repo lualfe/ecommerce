@@ -20,6 +20,11 @@ func (a InMemory) InsertUser(user *models.User) (*models.User, error) {
 		}
 		i++
 	}
+	for _, v := range a {
+		if v.Email == user.Email {
+			return nil, echo.NewHTTPError(http.StatusBadRequest, "user already exists")
+		}
+	}
 	user.ID = i
 	a[i] = user
 	return a[i], nil

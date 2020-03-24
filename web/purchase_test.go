@@ -38,19 +38,24 @@ func (s *PurchaseSuite) SetupSuite() {
 	}
 }
 
-func TestInit(t *testing.T) {
+func TestPurchaseInit(t *testing.T) {
 	suite.Run(t, new(PurchaseSuite))
 }
 
 func (s *PurchaseSuite) TestNewPurchase() {
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/purchase", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	c := s.e.NewContext(req, rec)
+	require.Error(s.T(), s.w.NewPurchase(c), "zip information and billing address zip are required but none were passed")
+
 	form := url.Values{}
 	form.Add("zip", "04049060")
 	form.Add("billing_zip", "04421100")
-	req := httptest.NewRequest(http.MethodPost, "/purchase", strings.NewReader(form.Encode()))
+	req = httptest.NewRequest(http.MethodPost, "/purchase", strings.NewReader(form.Encode()))
 	req.Form = form
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
-	rec := httptest.NewRecorder()
-	c := s.e.NewContext(req, rec)
+	c = s.e.NewContext(req, rec)
 	require.Error(s.T(), s.w.NewPurchase(c), "distance between both addresses is greater than 5000 meters, so an error is expected")
 
 	form = url.Values{}
@@ -59,7 +64,6 @@ func (s *PurchaseSuite) TestNewPurchase() {
 	req = httptest.NewRequest(http.MethodPost, "/purchase", strings.NewReader(form.Encode()))
 	req.Form = form
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
-	rec = httptest.NewRecorder()
 	c = s.e.NewContext(req, rec)
 	if assert.NoError(s.T(), s.w.NewPurchase(c)) {
 		assert.Equal(s.T(), http.StatusOK, rec.Code)

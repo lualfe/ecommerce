@@ -19,15 +19,14 @@ func (w *Web) InsertUser(c echo.Context) error {
 
 	user := &models.User{}
 	c.Bind(user)
-
 	hash, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not register user")
 	}
 	user.Password = hash
-	user, err = w.PG.InsertUser(user)
+	user, err = w.DB.InsertUser(user)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 
 	claims := &utils.JWTClaims{
@@ -60,7 +59,7 @@ func (w *Web) LoginUser(c echo.Context) error {
 
 	formUser := &models.User{}
 	c.Bind(formUser)
-	user, err := w.PG.GetUserByEmail(formUser)
+	user, err := w.DB.GetUserByEmail(formUser)
 	if err != nil {
 		return err
 	}
