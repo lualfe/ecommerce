@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
-	"github.com/lualfe/ecommerce/models"
+	"github.com/lualfe/ecommerce/models/auxmodels"
 )
 
 // GetCoordinates gets zip codes coordinates from google api
@@ -24,7 +24,7 @@ func GetCoordinates(zip, apiKey string) (lat, lng float64, err error) {
 		return 0, 0, echo.NewHTTPError(http.StatusInternalServerError, "could not process response body: ", err)
 	}
 
-	var geoCode *models.GeoCode
+	var geoCode *auxmodels.GeoCode
 	err = json.Unmarshal(body, &geoCode)
 	if err != nil {
 		return 0, 0, echo.NewHTTPError(http.StatusInternalServerError, "could not process json from response: ", err)
@@ -49,10 +49,13 @@ func GetDistance(lat1, lng1, lat2, lng2 float64, apiKey string) (int, error) {
 	if err != nil {
 		return 0, echo.NewHTTPError(http.StatusInternalServerError, "could not process response body: ", err)
 	}
-	var distanceMatrix *models.DistanceMatrix
+	var distanceMatrix *auxmodels.DistanceMatrix
 	err = json.Unmarshal(body, &distanceMatrix)
 	if err != nil {
 		return 0, echo.NewHTTPError(http.StatusInternalServerError, "could not process json from response: ", err)
+	}
+	if distanceMatrix.ErrorMessage != "" {
+		return 0, echo.NewHTTPError(http.StatusBadRequest, distanceMatrix.ErrorMessage)
 	}
 	var distance int
 	if len(distanceMatrix.Rows) > 0 {

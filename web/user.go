@@ -19,10 +19,17 @@ func (w *Web) InsertUser(c echo.Context) error {
 
 	user := &models.User{}
 	c.Bind(user)
-	user, err := w.App.PG.InsertUser(user)
+
+	hash, err := utils.HashPassword(user.Password)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not register user")
+	}
+	user.Password = hash
+	user, err = w.PG.InsertUser(user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+
 	claims := &utils.JWTClaims{
 		UserID: user.ID,
 	}
@@ -51,12 +58,16 @@ func (w *Web) LoginUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusPermanentRedirect, "user already logged in")
 	}
 
-	user := &models.User{}
-	c.Bind(user)
-	user, err := w.App.PG.LoginUser(user)
+	formUser := &models.User{}
+	c.Bind(formUser)
+	user, err := w.PG.GetUserByEmail(formUser)
 	if err != nil {
 		return err
 	}
+	if !utils.ComparePassword(formUser.Password, user.Password) {
+		return echo.NewHTTPError(http.StatusUnauthorized, "email or password incorrect")
+	}
+
 	claims := &utils.JWTClaims{
 		UserID: user.ID,
 	}

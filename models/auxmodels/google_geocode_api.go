@@ -1,4 +1,4 @@
-package models
+package auxmodels
 
 // GeoCode models google GeoCode Api response
 type GeoCode struct {

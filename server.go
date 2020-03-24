@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/lualfe/ecommerce/app"
+	"github.com/lualfe/ecommerce/app/pg"
 	"github.com/lualfe/ecommerce/web"
 	"github.com/spf13/viper"
 )
@@ -22,9 +22,9 @@ func init() {
 
 func main() {
 	e := echo.New()
-	a := app.NewApp()
-	a.PG.Migrate()
-	w := web.NewWeb(a)
+	postgres := pg.NewPostgres(viper.GetString("PG_CONNECT"))
+	w := web.NewWeb(postgres, postgres)
+	w.MG.Migrate()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "<-- Method: ${method} | URI: ${uri} | Status: ${status} | Latency: ${latency_human} -->\n",
 	}))
