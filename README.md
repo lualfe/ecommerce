@@ -25,7 +25,7 @@
 go run server.go
 ````
 
-4. Import the `insomnia_ecommerce.json` file in your insomnia
+4. Import the [insomnia_ecommerce.json](https://drive.google.com/open?id=1s8aLNBGcKvjLN2XSBQ86-zDA-4oTZ1Ej) file in your insomnia
 
 ## note
 
